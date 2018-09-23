@@ -1,6 +1,6 @@
 # todo-app
 
-> A Vue.js project
+> A Vue.js project (vue,vuex,axios, backend api)
 
 ## Build Setup
 
