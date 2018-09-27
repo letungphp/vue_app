@@ -1,7 +1,7 @@
 <template>
   <div>
-    <p>Completed Tasks: {{todos.filter(todo => {return todo.done === true}).length}}</p>
-    <p>Pending Tasks: {{todos.filter(todo => {return todo.done === false}).length}}</p>
+    <p>Completed Tasks: {{todos.filter(todo => {return todo.status !== 0}).length}}</p>
+    <p>Pending Tasks: {{todos.filter(todo => {return todo.done === 0}).length}}</p>
 
     <create-todo/>
 
@@ -28,6 +28,9 @@ export default {
 		todos(){
 			return this.$store.getters.todoFromStore;
 		},
+	},
+	mounted : function(){
+		this.$store.dispatch('A_LOAD_TODO');
 	}
 };
 </script>

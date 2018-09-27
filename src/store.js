@@ -1,33 +1,58 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import axios from 'axios';
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
 	//State chứa tất cả các thông tin muốn sử dụng cho ứng dụng
 	state : {
-
 		//todo data when init here
-		todos : [{
-			title: 'Todo A',
-			project: 'Project A',
-			done: false,
-		}]
+		todos : [] //default array todo is empty
 	},
 	actions : {
+		A_LOAD_TODO ({commit}){
+            axios.get("http://localhost:8000/todo?token=eyJpdiI6Ikt1R0ZhSjUxSEFacGZHVDR2ZTNNQXc9PSIsInZhbHVlIjoiM2ln")
+            .then((response) => {
+                commit("M_LOAD_TODO", response);
+            })
+            .catch((error => {
+                console.log(error);
+            }));
+
+		},
 		A_ADD_TODO ({ commit }, todo ){
 			let new_todo_obj = {
 				title : todo.title,
-				project : todo.project,
-				done : false
+				description : todo.description,
+				status : 0
 			}
-			commit ( "M_ADD_TODO" , new_todo_obj);
+
+            axios.post("http://localhost:8000/todo?token=eyJpdiI6Ikt1R0ZhSjUxSEFacGZHVDR2ZTNNQXc9PSIsInZhbHVlIjoiM2ln",new_todo_obj)
+            .then((response) => {
+                commit("M_ADD_TODO", new_todo_obj);
+            })
+            .catch((error => {
+                console.log(error);
+            }));
 		},
 		A_DEL_TODO ({ commit }, todo ) {
-			commit ( "M_DEL_TODO" , todo);
+			axios.delete("http://localhost:8000/todo/"+todo.id+"?token=eyJpdiI6Ikt1R0ZhSjUxSEFacGZHVDR2ZTNNQXc9PSIsInZhbHVlIjoiM2ln",todo)
+            .then((response) => {
+                commit("M_DEL_TODO", todo);
+            })
+            .catch((error => {
+                console.log(error);
+            }));
 		},
 		A_UPT_TODO ({ commit }, todo ) {
-			commit ( "M_UPT_TODO" , todo);
+			axios.put("http://localhost:8000/todo?token=eyJpdiI6Ikt1R0ZhSjUxSEFacGZHVDR2ZTNNQXc9PSIsInZhbHVlIjoiM2ln",todo)
+            .then((response) => {
+                commit("M_UPT_TODO", todo);
+            })
+            .catch((error => {
+                console.log(error);
+            }));
 		}
 	},
 	getters : {
@@ -37,6 +62,10 @@ const store = new Vuex.Store({
 		}
 	},
 	mutations : {
+		//Set data from api to store state
+		M_LOAD_TODO ( state , api_response ){
+			state.todos = api_response.data;
+		},
 		M_ADD_TODO( state , new_todo ){
 			return state.todos.push(new_todo);
 		},
@@ -46,9 +75,8 @@ const store = new Vuex.Store({
 		},
 		M_UPT_TODO ( state , todo ) {
 			const todoIndex = state.todos.indexOf(todo);
-			state.todos[todoIndex].done = !state.todos[todoIndex].done;
+			state.todos[todoIndex] = todo;
 		}
-
 	}
 });
 

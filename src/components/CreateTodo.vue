@@ -48,13 +48,13 @@ export default {
     sendForm() {
       //get data from form
       const title   = this.titleText;
-      const project = this.projectText;
+      const description = this.projectText;
       //dispatch to store
       this.$store.dispatch('A_ADD_TODO',
       {
           title,
-          project,
-          done: false,
+          description,
+          status: 0,
       }
       );
       //reset form
