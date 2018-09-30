@@ -21,10 +21,11 @@ $router->get('/','HomeController@index');
 
 
 $router->post('/user','UserController@register');
+$router->post('/user/login','UserController@login');
 
 $router->group(['middleware' => 'auth'], function () use ($router) {
 	$router->get('/user','UserController@info');
-	$router->put('/user/update','UserController@update');
+	$router->put('/user','UserController@update');
 	$router->delete('/user/','UserController@delete');
 });
 

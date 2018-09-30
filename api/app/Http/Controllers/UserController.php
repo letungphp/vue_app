@@ -18,6 +18,47 @@ class UserController extends Controller
         //
     }
 
+    public function login(Request $request){
+
+        $validatedData = $this->validate($request,[
+            'email'     => 'required',
+            'password'  => 'required'
+        ]);
+        
+
+        $data = DB::table('users')->where([
+            'email'     => $request->email
+        ])->first();
+
+        if(!$data){
+            $response = [
+                'status' => 'error',
+                'message'=> 'Login failed',
+                'data'   => []
+            ];
+            return response()->json($response,200);
+        }
+
+        if(Crypt::decrypt($data->password) != $request->password ){
+            $response = [
+                'status' => 'error',
+                'message'=> 'Invalid password',
+                'data'   => []
+            ];
+            return response()->json($response,200);
+        }
+
+        $data->token = $data->password;
+
+        $response = [
+            'status' => 'success',
+            'message'=> '',
+            'data'   => $data
+        ];
+
+        return response()->json($response,200);
+    }
+
     public function register(Request $request){
 
         $validatedData = $this->validate($request,[

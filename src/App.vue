@@ -1,21 +1,37 @@
 <template>
   <div id="app">
-    <TodoList/>
+
+    <router-link to="/">Home</router-link>
+    <router-link to="/todo">Todo</router-link>
+    <button @click="logout()">Logout</button>
+    <div v-show="showloading" > Processing ... </div>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import TodoList from './components/TodoList'
 
 export default {
   name: 'App',
   components: {
-    TodoList
+
   },
   data() {
     return {
       
     };
+  },
+  computed : {
+    showloading (){
+      this.$store.getters.showloading
+    }
+  },
+  methods : {
+    'logout' : function(){
+      this.$store.dispatch( 'A_LOGOUT').then(()=>{
+        this.$router.push('/login');
+      });;
+    }
   }
 }
 </script>

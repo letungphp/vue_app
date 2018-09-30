@@ -1,19 +1,48 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import axios from 'axios';
+import api_config from './config/api';
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
 	//State chứa tất cả các thông tin muốn sử dụng cho ứng dụng
 	state : {
+		//Loading
+		page_loading : false,
+		//token for login user
+		auth_token : localStorage.getItem('token') || '',
+		auth_status : '',
 		//todo data when init here
 		todos : [] //default array todo is empty
 	},
 	actions : {
-		A_LOAD_TODO ({commit}){
-            axios.get("http://localhost:8000/todo?token=eyJpdiI6Ikt1R0ZhSjUxSEFacGZHVDR2ZTNNQXc9PSIsInZhbHVlIjoiM2ln")
+		//PAGE LOGIN
+		A_LOGIN ({commit}, logindata){
+			commit('M_LOADING');
+			axios.post(api_config.HOST+"/user/login",{...api_config.DEFAUT_PARAMS, ...logindata})
             .then((response) => {
+            	localStorage.setItem('token',response.data.data.token);
+            	axios.defaults.params = {};
+				axios.defaults.params[ 'token' ] = response.data.data.token;
+                commit("M_LOGIN_SUCCESS", response.data.data);
+            })
+            .catch((error => {
+            	localStorage.removeItem('token');
+            	axios.defaults.params = {};
+                commit("M_LOGIN_FAIL");
+            }));
+		},
+		A_LOGOUT ({commit}){
+			console.log('Log out');
+			localStorage.removeItem('token');
+			commit('M_LOGOUT');
+		},
+		//PAGE TODO
+		A_LOAD_TODO ({commit}){
+            axios.get(api_config.HOST+"/todo")
+            .then((response) => {
+            	console.log(response);
                 commit("M_LOAD_TODO", response);
             })
             .catch((error => {
@@ -28,7 +57,7 @@ const store = new Vuex.Store({
 				status : 0
 			}
 
-            axios.post("http://localhost:8000/todo?token=eyJpdiI6Ikt1R0ZhSjUxSEFacGZHVDR2ZTNNQXc9PSIsInZhbHVlIjoiM2ln",new_todo_obj)
+            axios.post(api_config.HOST+"/todo",new_todo_obj)
             .then((response) => {
                 commit("M_ADD_TODO", new_todo_obj);
             })
@@ -37,7 +66,7 @@ const store = new Vuex.Store({
             }));
 		},
 		A_DEL_TODO ({ commit }, todo ) {
-			axios.delete("http://localhost:8000/todo/"+todo.id+"?token=eyJpdiI6Ikt1R0ZhSjUxSEFacGZHVDR2ZTNNQXc9PSIsInZhbHVlIjoiM2ln",todo)
+			axios.delete(api_config.HOST+"/todo/"+todo.id,todo)
             .then((response) => {
                 commit("M_DEL_TODO", todo);
             })
@@ -46,7 +75,7 @@ const store = new Vuex.Store({
             }));
 		},
 		A_UPT_TODO ({ commit }, todo ) {
-			axios.put("http://localhost:8000/todo?token=eyJpdiI6Ikt1R0ZhSjUxSEFacGZHVDR2ZTNNQXc9PSIsInZhbHVlIjoiM2ln",todo)
+			axios.put(api_config.HOST+"/todo",todo)
             .then((response) => {
                 commit("M_UPT_TODO", todo);
             })
@@ -59,9 +88,28 @@ const store = new Vuex.Store({
 		//Hàm lấy thông tin từ state , các component sử dụng sẽ gọi bằng cách sử dụng computed function "this.$store.getters.todoFromStore"
 		todoFromStore : (state) => {
 			return state.todos;
-		}
+		},
+		isAuthenticated: state => !!state.auth_token,
+  		authStatus: state => state.auth_status,
+  		showloading : state => state.page_loading
+
 	},
 	mutations : {
+		M_LOADING (state){
+			state.page_loading = true;
+		},
+		M_LOGIN_SUCCESS ( state , logindata){
+			state.auth_status = true;
+			state.auth_token  = logindata.token;
+			state.page_loading = false;
+		},
+		M_LOGIN_FAIL (state ){
+			state.page_loading = false;
+		},
+		M_LOGOUT (state){
+			state.auth_status = false;
+			state.auth_token = '';
+		},
 		//Set data from api to store state
 		M_LOAD_TODO ( state , api_response ){
 			state.todos = api_response.data;

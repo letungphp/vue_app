@@ -25,7 +25,7 @@ class UserTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('email');
-            $table->string('password', 60);
+            $table->text('password');
             $table->string('tel', 12)->nullable()->default('');
             $table->date('birth')->nullable()->default(null);
             $table->rememberToken();
